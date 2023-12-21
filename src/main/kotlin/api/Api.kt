@@ -45,6 +45,12 @@ class Api(
         val nowMap: String? = null
     )
 
+    data class LRCLog(
+        var id: String,
+        var time: Long,
+        var kick: Boolean,
+        var msg:String
+    )
     fun getMaps(): Maps? {
         val postData = ApiCore.postData(
             gameID,
@@ -56,6 +62,22 @@ class Api(
         ) ?: return null
         return try {
             Gson().fromJson(postData, Maps::class.java)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
+    fun getLRClogs(): LRCLog? {
+        val postData = ApiCore.postData(
+            gameID,
+            "getLRClogs",
+            "no",
+            opQQ,
+            opGroup,
+            token
+        ) ?: return null
+        return try {
+            Gson().fromJson(postData, LRCLog::class.java)
         } catch (e: Exception) {
             e.printStackTrace()
             null

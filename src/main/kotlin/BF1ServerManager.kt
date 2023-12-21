@@ -8,9 +8,18 @@ import net.mamoe.mirai.event.globalEventChannel
 import net.mamoe.mirai.event.subscribeGroupMessages
 import net.mamoe.mirai.utils.info
 import api.Api
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import net.mamoe.mirai.Mirai
+import net.mamoe.mirai.console.plugin.id
+import net.mamoe.mirai.event.events.BotOnlineEvent
 import top.ffshaozi.command.SettingCommand
 import top.ffshaozi.config.Bindings
 import top.ffshaozi.config.Setting
+import java.text.SimpleDateFormat
+import java.util.Date
 
 object BF1ServerManager : KotlinPlugin(
     JvmPluginDescription(
@@ -25,9 +34,34 @@ object BF1ServerManager : KotlinPlugin(
         Bindings.reload()
         Setting.reload()
         SettingCommand.register()
+        globalEventChannel().subscribeAlways<BotOnlineEvent>{ bot ->
+            bot.bot.groups.forEach { event ->
+                //LRC通知
+                Bindings.bindingServer[event.id]?.forEach {
+                    var oldLrc : Api.LRCLog = Api.LRCLog("",0,false,"")
+                    val api = Api(event.id, 10086)
+                    api.gameID = it.gameid
+                    api.token = it.token
+                    CoroutineScope(Dispatchers.IO).launch {
+                        while (bot.bot.isOnline){
+                            api.getLRClogs()?.let { new ->
+                                if (oldLrc.id != new.id && System.currentTimeMillis() - new.time < 5 * 60 * 1000){
+                                    event.sendMessage("在服务器 ${Bindings.bindingServer[event.id]?.find { server -> server.gameid == api.gameID }?.name} 中玩家 ${new.id} 数据异常提醒\n\n ${new.msg.replace("&&","\n ")}\n${if(new.kick) "已踢出该玩家" else "未踢出该玩家"} 更新时间:${SimpleDateFormat("MM-dd HH:mm:ss").format(new.time)}\nTips:目前版本无法判断刷枪和双伤导致的数据异常,如果出现误判请联系管理使用 awl 服务器名 误判ID 解除")
+                                    delay(500)
+                                }
+                                oldLrc = new
+                            }
+                            delay(1000 * 30)
+                        }
+                    }
+                }
+            }
+        }
         globalEventChannel().subscribeGroupMessages {
-            sentByAdministrator() quoteReply {
-                val api = Api(this.sender.id, this.group.id)
+            sentByOperator() quoteReply {
+                val event = this
+                val api = Api(event.group.id, event.sender.id)
+
                 val cmd = it.split(" ")
                 //logger.info { cmd.toString() }
                 if (cmd.getOrNull(0) == "shelp")
@@ -53,7 +87,7 @@ object BF1ServerManager : KotlinPlugin(
                         """.trimIndent()
                 else
                     cmd.getOrNull(1)?.let {
-                        Bindings.bindingServer[this.group.id]?.find { server -> server.name == it }?.let {
+                        Bindings.bindingServer[event.group.id]?.find { server -> server.name == it }?.let {
                             api.gameID = it.gameid
                             api.token = it.token
                             //命令解析
@@ -199,7 +233,10 @@ object BF1ServerManager : KotlinPlugin(
                 }
 
                 else -> {
-                    commandProcessor(cmd, api, getAlias(cmd0, api.opGroup))
+                    if (alias == null && cmd.getOrNull(0) != "null")
+                        commandProcessor(listOf("null"), api, getAlias(cmd0, api.opGroup))
+                    else
+                        null
                 }
             }
         }

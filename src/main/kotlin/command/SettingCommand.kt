@@ -37,10 +37,24 @@ object SettingCommand : CompositeCommand(
 
     @SubCommand()
     @Description("添加服务器")
-    suspend fun CommandSender.adds(groupid: Long? = this.subject?.id,gameid: String, name: String, token: String) {
-        if (groupid == null) return
-        Bindings.addServer(gameid, groupid, name, token)
-        sendMessage("群组绑定列表 ${Bindings.bindingServer[groupid]}")
+    suspend fun CommandSender.add(name: String, gameID: String, token: String, groupID: Long? = this.subject?.id) {
+        if (groupID == null) return
+        Bindings.addServer(gameID, groupID, name, token)
+        sendMessage("群组绑定列表 ${Bindings.bindingServer[groupID]}")
+    }
+    @SubCommand()
+    @Description("移除服务器")
+    suspend fun CommandSender.remove(gameID: String, groupID: Long? = this.subject?.id) {
+        if (groupID == null) return
+        Bindings.rmServer(gameID, groupID)
+        sendMessage("群组绑定列表 ${Bindings.bindingServer[groupID]}")
+    }
+
+    @SubCommand()
+    @Description("修正服务器")
+    suspend fun CommandSender.replace(name: String, newGameID: String) {
+        Bindings.replaceServer( name, newGameID)
+        sendMessage("成功")
     }
 
 }

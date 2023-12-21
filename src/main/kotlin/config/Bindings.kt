@@ -18,7 +18,7 @@ object Bindings : AutoSavePluginData("Bindings") {
     var alias: MutableMap<Long, MutableMap<String,String>> by value()//Long群号
     @Serializable
     data class Server(
-        val gameid: String,
+        var gameid: String,
         val name: String,
         val token: String
     )
@@ -32,6 +32,17 @@ object Bindings : AutoSavePluginData("Bindings") {
         } else {
             "已绑定过该服务器,请删除后重新绑定"
         }
+    }
+    fun replaceServer(name: String, newGameid: String): Boolean {
+        bindingServer.forEach {
+            it.value.forEach {
+                if (it.name == name) {
+                    it.gameid = newGameid
+                    return true
+                }
+            }
+        }
+        return false
     }
 
     fun rmServer(gameid: String, groupid: Long): String {
