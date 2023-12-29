@@ -16,6 +16,8 @@ object Bindings : AutoSavePluginData("Bindings") {
     var bindingServer: MutableMap<Long, MutableList<Server>> by value()//Long群号
     @ValueDescription("别名")
     var alias: MutableMap<Long, MutableMap<String,String>> by value()//Long群号
+    @ValueDescription("通知群群号")
+    var notificationGroups:MutableList<Long> by value()
     @Serializable
     data class Server(
         var gameid: String,

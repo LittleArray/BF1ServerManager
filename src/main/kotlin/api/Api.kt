@@ -48,6 +48,7 @@ class Api(
     data class LRCLog(
         var id: String,
         var time: Long,
+        var playTime: Long,
         var kick: Boolean,
         var msg:String
     )

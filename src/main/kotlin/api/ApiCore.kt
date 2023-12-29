@@ -96,5 +96,30 @@ object ApiCore {
             null
         }
     }
+    fun getLRClogs(): String? {
+        val response = try {
+            val request = Request.Builder()
+                .url("${Setting.opServerUrl}/lrcLogs")
+                .build()
+            val response = okHttpClient
+                .newBuilder()
+                .connectTimeout(15, TimeUnit.SECONDS)//设置连接超时时间
+                .readTimeout(15, TimeUnit.SECONDS)//设置读取超时时间
+                .build()
+                .newCall(request).execute()
+            if (response.isSuccessful) {
+                PostResponse(isSuccessful = true, reqBody = response.body.string())
+            } else {
+                PostResponse(isSuccessful = false, reqBody = response.body.string())
+            }
+        } catch (ex: Exception) {
+            PostResponse(isSuccessful = false, error = ex.stackTraceToString())
+        }
+        return if (response.isSuccessful) {
+            response.reqBody
+        } else {
+            null
+        }
+    }
 
 }

@@ -1,5 +1,5 @@
 # 管服插件
-请与(https://github.com/LittleArray/BF1AutoManageServer)配套使用
+请与 (https://github.com/LittleArray/BF1AutoManageServer) 配套使用
 # 部署
 请使用[Mirai 2.16.0](https://github.com/mamoe/mirai)以上版本的控制台加载插件
 <br>将插件放入plugins文件夹内即可

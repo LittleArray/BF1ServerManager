@@ -26,6 +26,20 @@ object SettingCommand : CompositeCommand(
         Bindings.bindingServer[groupId] = mutableListOf()
         sendMessage("添加群组成功 $groupId")
     }
+    @SubCommand()
+    @Description("添加通知群组")
+    suspend fun CommandSender.agg(groupId: Long? = this.subject?.id) {
+        if (groupId == null) return
+        Bindings.notificationGroups.add(groupId)
+        sendMessage("添加通知群组成功 $groupId")
+    }
+    @SubCommand()
+    @Description("移除通知群组")
+    suspend fun CommandSender.rgg(groupId: Long? = this.subject?.id) {
+        if (groupId == null) return
+        Bindings.notificationGroups.remove(groupId)
+        sendMessage("移除通知群组成功 $groupId")
+    }
 
     @SubCommand()
     @Description("移除群组")
